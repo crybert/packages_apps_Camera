@@ -281,6 +281,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private TextView mRecordingTimeView;
     private RotateLayout mRecordingTimeRect;
 
+    // Burst mode
+    private int mBurstShotsDone = 0;
+    private boolean mBurstShotInProgress = false;
+
     // multiple cameras support
     private int mNumberOfCameras;
     private int mCameraId;
@@ -942,6 +946,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             Log.v(TAG, "mJpegCallbackFinishTime = "
                     + mJpegCallbackFinishTime + "ms");
             mJpegPictureCallbackTime = 0;
+
+            if (mSnapshotOnIdle && mBurstShotsDone > 0) {
+                mHandler.post(mDoSnapRunnable);
+            }
         }
     }
 
@@ -1409,7 +1417,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_VOLUME_ZOOM,
                 CameraSettings.KEY_PICTURE_SIZE,
                 CameraSettings.KEY_FOCUS_MODE,
+<<<<<<< HEAD
                 CameraSettings.KEY_TIMER_MODE};
+=======
+                CameraSettings.KEY_ISO,
+                CameraSettings.KEY_TIMER_MODE,
+                CameraSettings.KEY_BURST_MODE};
+>>>>>>> 19c469c... Camera: add burst mode (up to 20 shots)
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -1636,6 +1650,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void onShutterButtonClick() {
+        int nbBurstShots = Integer.valueOf(mPreferences.getString(CameraSettings.KEY_BURST_MODE, "1"));
         if (!mTimerMode) {
             if (mCaptureMode != 0) {
                 mTimerMode = true;
@@ -1656,7 +1671,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             return;
         }
 
-        if (mPausing || collapseCameraControls()) return;
+        if (mPausing || collapseCameraControls()) {
+            return;
+        }
 
         // Do not take the picture if there is not enough storage.
         if (mPicturesRemaining <= 0) {
@@ -1676,13 +1693,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             return;
         }
 
-        mSnapshotOnIdle = false;
         if (mSnapshotMode == CameraInfo.CAMERA_SUPPORT_MODE_ZSL) {
             mFocusManager.setZslEnable(true);
         } else {
             mFocusManager.setZslEnable(false);
         }
+
         mFocusManager.doSnap();
+        mBurstShotsDone++;
+
+        if (mBurstShotsDone == nbBurstShots) {
+            mBurstShotsDone = 0;
+            mSnapshotOnIdle = false;
+        } else if (mSnapshotOnIdle == false) {
+            // queue a new shot until we done all our shots
+            mSnapshotOnIdle = true;
+        }
     }
 
     private OnScreenHint mStorageHint;
@@ -2128,8 +2154,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mFocusManager.onPreviewStarted();
         mCameraDevice.setParameters(mParameters);
 
-        if (mSnapshotOnIdle) {
-            mSnapshotOnIdle = false;
+        if (mSnapshotOnIdle && mBurstShotsDone > 0) {
             mHandler.post(mDoSnapRunnable);
         }
     }
