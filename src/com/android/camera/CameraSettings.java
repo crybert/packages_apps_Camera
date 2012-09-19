@@ -65,6 +65,7 @@ public class CameraSettings {
     public static final String KEY_STORAGE = "pref_camera_storage_key";
     public static final String KEY_ZSL = "pref_camera_zsl_key";
     public static final String KEY_VOLUME_ZOOM = VolumeZoomPreference.KEY;
+	public static final String KEY_ISO = "pref_camera_iso_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
