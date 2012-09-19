@@ -162,12 +162,9 @@ public class CameraSettings {
                 group.findPreference(KEY_VIDEOCAMERA_FLASH_MODE);
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
         ListPreference storage = group.findPreference(KEY_STORAGE);
-<<<<<<< HEAD
-=======
         ListPreference iso = group.findPreference(KEY_ISO);
         ListPreference burstMode = group.findPreference(KEY_BURST_MODE);
 
->>>>>>> 19c469c... Camera: add burst mode (up to 20 shots)
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
@@ -215,14 +212,11 @@ public class CameraSettings {
             resetIfInvalid(videoEffect);
         }
         if (storage != null) buildStorage(group, storage);
-<<<<<<< HEAD
-=======
         if (iso != null) {
             filterUnsupportedOptions(group,
                     iso, mParameters.getSupportedIsoValues());
         }
         if (burstMode != null) burstMode.setValueIndex(4);
->>>>>>> 19c469c... Camera: add burst mode (up to 20 shots)
     }
 
     private void buildExposureCompensation(
